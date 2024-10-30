@@ -1,4 +1,7 @@
 flask
 datetime
 WTForms
+Flask_WTF
 python-dotenv
+email_validator
+flask_sqlalchemy
