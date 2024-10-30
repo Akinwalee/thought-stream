@@ -1,6 +1,12 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, url_for, flash, redirect, request
 from datetime import datetime
+from auth import Register, Login
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 app = Flask(__name__)
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
 posts = [
     {
@@ -26,6 +32,26 @@ def home():
 @app.route("/about/")
 def about():
     return render_template('about.html')
+
+@app.route("/register/", methods=["GET", "POST"])
+def register():
+    form = Register()
+    print(request.method)
+    print(form.validate())
+    if request.method == "POST":
+        if form.validate():
+            flash(f"Account created for user {form.username.data}!", "success")
+            return (redirect(url_for("home")))
+        else:
+            flash(f"Account creation error!", "failure")
+            print(form.errors.items())
+            return (redirect(url_for("register")))
+    return (render_template("register.html", title="Register", form=form))
+
+@app.route("/login/", methods=["GET", "POST"])
+def login():
+    form = Login()
+    return (render_template("login.html", title="Login", form=form))
 
 if __name__ == "__main__":
     app.run(debug=True)
