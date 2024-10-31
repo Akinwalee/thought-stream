@@ -5,3 +5,4 @@ Flask_WTF
 python-dotenv
 email_validator
 flask_sqlalchemy
+flask_bcrypt
