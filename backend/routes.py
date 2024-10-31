@@ -1,10 +1,13 @@
 from . import app, bcrypt
 from . import db
-from .auth import Register, Login
+import secrets
+from PIL import Image
+from .auth import Register, Login, UpdateProfile
 from flask import render_template, url_for, flash, redirect, request
 from .models import User, Post
 from datetime import datetime
 from flask_login import login_user, current_user, logout_user, login_required
+import os
 posts = [
     {
         "author": "Obatula Fuad",
@@ -62,12 +65,39 @@ def logout():
     logout_user()
     return redirect(url_for("login"))
 
-@app.route("/profile/")
+@app.route("/profile/", methods=["GET", "POST"])
 @login_required
 def profile():
-    return (render_template("profile.html", title="Profile"))
+    form = UpdateProfile()
+    if request.method == "GET":
+        form.username.data = current_user.username
+        form.email.data = current_user.email
+        form.picture.data = current_user.image
+    else:
+        if form.validate_on_submit():
+            if form.picture.data:
+                current_user.image = save_pic(form.picture.data)
+            current_user.username = form.username.data
+            current_user.email = form.email.data
+            
+            db.session.commit()
+            flash("Your profile has been updated successfully", "success")
+            return (redirect(url_for("profile")))
+    image = url_for("static", filename=current_user.image)
+    return (render_template("profile.html", title="Profile", image=image, form=form))
 
 
+def save_pic(picture):
+    base = secrets.token_hex(8)
+    _, ext = os.path.splitext(picture.filename)
+    base = base + ext
+    path = os.path.join(app.root_path, "static", base)
+
+    img = Image.open(picture)
+    img.thumbnail((150, 150))
+    img.save(path)
+    
+    return base
 
 def create_user(form):
     password = bcrypt.generate_password_hash(form.password.data).decode("utf-8")

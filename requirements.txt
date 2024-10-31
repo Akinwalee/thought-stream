@@ -7,3 +7,4 @@ email_validator
 flask_sqlalchemy
 flask_bcrypt
 Flask-Login
+Pillow
