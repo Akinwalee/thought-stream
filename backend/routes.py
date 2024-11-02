@@ -8,20 +8,6 @@ from .models import User, Post
 from datetime import datetime
 from flask_login import login_user, current_user, logout_user, login_required
 import os
-# posts = [
-#     {
-#         "author": "Obatula Fuad",
-#         "title": "First Blog Post",
-#         "text": "This is the first post in this blog and I'm using it to test the flask Jinja templating thing",
-#         "date": datetime.now()
-#     },
-#     {
-#         "author": "Jognn Does",
-#         "title": "Second Blog Post",
-#         "text": "John Doe is John Doe because John Does loves John Does",
-#         "date": datetime.now()
-#     }
-# ] 
 
 @app.route("/")
 def home():
@@ -150,4 +136,3 @@ def get_user(form):
         return (False)
     
     return (user)
-    
