@@ -2,30 +2,30 @@ from . import app, bcrypt
 from . import db
 import secrets
 from PIL import Image
-from .auth import Register, Login, UpdateProfile
+from .forms import Register, Login, UpdateProfile, CreatePost
 from flask import render_template, url_for, flash, redirect, request
 from .models import User, Post
 from datetime import datetime
 from flask_login import login_user, current_user, logout_user, login_required
 import os
-posts = [
-    {
-        "author": "Obatula Fuad",
-        "title": "First Blog Post",
-        "text": "This is the first post in this blog and I'm using it to test the flask Jinja templating thing",
-        "date": datetime.now()
-    },
-    {
-        "author": "Jognn Does",
-        "title": "Second Blog Post",
-        "text": "John Doe is John Doe because John Does loves John Does",
-        "date": datetime.now()
-    }
-]
-
+# posts = [
+#     {
+#         "author": "Obatula Fuad",
+#         "title": "First Blog Post",
+#         "text": "This is the first post in this blog and I'm using it to test the flask Jinja templating thing",
+#         "date": datetime.now()
+#     },
+#     {
+#         "author": "Jognn Does",
+#         "title": "Second Blog Post",
+#         "text": "John Doe is John Doe because John Does loves John Does",
+#         "date": datetime.now()
+#     }
+# ] 
 
 @app.route("/")
 def home():
+    posts = Post.query.all()
     return render_template('home.html', posts=posts)
 
 @app.route("/about/")
@@ -87,6 +87,37 @@ def profile():
     return (render_template("profile.html", title="Profile", image=image, form=form))
 
 
+@app.route("/post/new", methods=["GET", "POST"])
+@login_required
+def new_post():
+    form = CreatePost()
+    if form.validate_on_submit():
+        post = Post(
+                title=form.title.data,
+                content=form.text.data,
+                user_id=current_user.id,
+                date=datetime.now()
+                )
+        db.session.add(post)
+        db.session.commit()
+        flash("Post creted", "success")
+        return redirect(url_for("home"))
+    
+    return (render_template("thoughts.html", title="Thoughts", form=form))
+
+
+# Get indiviual post
+@app.route("/post/<int:_id>")
+def get_post(_id):
+    post = Post.query.get_or_404(_id)
+    form = CreatePost()
+    
+    return render_template("thought.html", post=post, title="Thought", form=form)
+
+
+
+
+# Helper functions
 def save_pic(picture):
     base = secrets.token_hex(8)
     _, ext = os.path.splitext(picture.filename)

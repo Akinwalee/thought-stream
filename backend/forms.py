@@ -1,4 +1,4 @@
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
 from wtforms.validators import InputRequired, EqualTo, Length, Email, ValidationError
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
@@ -43,3 +43,9 @@ class UpdateProfile(FlaskForm):
         user = User.query.filter_by(email=email.data).first()
         if user and email.data != current_user.email:
             raise ValidationError("A user with this email already exist")
+        
+
+class CreatePost(FlaskForm):
+    title = StringField("Write an heading for your thoughts", [InputRequired(), Length(min=5, max=30)])
+    text = TextAreaField("Write your thoughts here", [InputRequired()])
+    submit = SubmitField("Post")
